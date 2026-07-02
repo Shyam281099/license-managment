@@ -98,20 +98,7 @@
       </button>
       <div class="nav-subsection ml-5 pl-3 border-l border-outline-variant/50 space-y-1 mt-1">
         <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/license-packages" data-route-match="/license-packages"><span class="material-symbols-outlined text-lg">inventory_2</span><span>License Packages</span></a>
-      </div>
-    </div>
-    <div class="pt-1">
-      <button type="button" onclick="toggleNavSection(this)" class="nav-section-toggle w-full flex items-center justify-between px-3 py-2 text-on-surface font-semibold text-nav-item hover:bg-surface-container-high rounded-lg transition-colors">
-        <span class="flex items-center space-x-3"><span class="material-symbols-outlined text-xl text-primary">key</span><span>License Management</span></span>
-        <span class="material-symbols-outlined text-[18px] nav-chevron transition-transform duration-200">expand_more</span>
-      </button>
-      <div class="nav-subsection ml-5 pl-3 border-l border-outline-variant/50 space-y-1 mt-1">
-        <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/exec-dashboard" data-route-match="/exec-dashboard"><span class="material-symbols-outlined text-lg">monitoring</span><span>Executive Dashboard</span></a>
-        <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/templates" data-route-match="/templates"><span class="material-symbols-outlined text-lg">dashboard_customize</span><span>Create Template</span></a>
-        <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/licenses" data-route-match="/licenses"><span class="material-symbols-outlined text-lg">workspace_premium</span><span>Create Licenses</span></a>
-        <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/license-details" data-route-match="/license-details"><span class="material-symbols-outlined text-lg">badge</span><span>License Details</span></a>
         <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/license-reports" data-route-match="/license-reports"><span class="material-symbols-outlined text-lg">assessment</span><span>License Reports</span></a>
-        <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/invoices" data-route-match="/invoices"><span class="material-symbols-outlined text-lg">payments</span><span>Invoices</span></a>
       </div>
     </div>
     <a class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#"><span class="material-symbols-outlined text-xl">person_search</span><span>Leads</span></a>
@@ -129,7 +116,6 @@
         <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/templates" data-route-match="/templates"><span class="material-symbols-outlined text-lg">dashboard_customize</span><span>Create Template</span></a>
         <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/licenses" data-route-match="/licenses"><span class="material-symbols-outlined text-lg">workspace_premium</span><span>Create Licenses</span></a>
         <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/license-details" data-route-match="/license-details"><span class="material-symbols-outlined text-lg">badge</span><span>License Details</span></a>
-        <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/license-reports" data-route-match="/license-reports"><span class="material-symbols-outlined text-lg">assessment</span><span>License Reports</span></a>
         <a class="nav-link flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors text-nav-item" href="#/invoices" data-route-match="/invoices"><span class="material-symbols-outlined text-lg">payments</span><span>Invoices</span></a>
       </div>
     </div>
@@ -562,6 +548,10 @@ function makeFreshDraft() {
     discount: 10,
     courseFilter: '',
     paymentType: 'paid',
+    billingType: 'prepaid',
+    billingCycle: 'Monthly',
+    nextBillingDate: '',
+    autoRenew: true,
     paidAmountUSD: 0,
     transactionRef: ''
   };
@@ -5104,6 +5094,7 @@ function renderLicenseDetail(id){
               <div><span class="block text-on-surface-variant mb-0.5">Discount</span><span class="font-medium">${l.discount || 0}%</span></div>
               <div><span class="block text-on-surface-variant mb-0.5">Created Date</span><span class="font-medium">${l.created}</span></div>
               <div><span class="block text-on-surface-variant mb-0.5">Payment Status</span>${paymentChip(l.paymentStatus)}</div>
+              <div><span class="block text-on-surface-variant mb-0.5">Billing Type</span><span class="font-medium">${billingTypeLabel(l.billingType)}${l.billingType==='recurring' ? ` · ${l.billingCycle||''}${l.nextBillingDate?` · next ${l.nextBillingDate}`:''}` : ''}</span></div>
             </div>
           </div>
 
@@ -5806,6 +5797,9 @@ function proceedToSummary(){
 // ============================================================================
 // VIEW: CREATE LICENSE — STEP 2 (Order Summary & Payment)
 // ============================================================================
+function billingTypeLabel(v){ return {prepaid:'Prepaid', postpaid:'Postpaid', recurring:'Recurring'}[v] || 'Prepaid'; }
+function billingCycleDays(c){ return {Monthly:30, Quarterly:91, Annual:365}[c] || 30; }
+
 function renderCreateSummary(){
   const d = AppState.draft;
   const companyNames = { acme:'Acme Corp', globex:'Globex Corporation', soylent:'Soylent Corp', initech:'Initech', dedicated:'Dedicated Client Inc' };
@@ -5918,6 +5912,33 @@ function renderCreateSummary(){
             </div>
           </div>
 
+          <!-- Billing Type -->
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+            <h3 class="text-headline-lg text-on-surface mb-1">Billing Type</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">How this license is billed. Recurring re-invoices automatically each cycle.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              ${['prepaid','postpaid','recurring'].map(b=>{
+                const L={prepaid:'Prepaid',postpaid:'Postpaid',recurring:'Recurring'};
+                const dsc={prepaid:'One-time, paid upfront',postpaid:'Billed after purchase / usage',recurring:'Renews & re-bills each cycle'};
+                const ic={prepaid:'paid',postpaid:'schedule_send',recurring:'autorenew'};
+                const s=d.billingType===b;
+                return `<label class="cursor-pointer"><input class="peer sr-only billing-radio" name="billingType" type="radio" value="${b}" ${s?'checked':''}>
+                  <div class="p-4 rounded-lg border ${s?'border-primary bg-primary-container/10 ring-1 ring-primary':'border-outline-variant bg-surface'} transition-all h-full">
+                    <span class="material-symbols-outlined ${s?'text-primary':'text-on-surface-variant'} block mb-1 text-xl">${ic[b]}</span>
+                    <span class="text-label-bold text-on-surface block">${L[b]}</span>
+                    <span class="text-[12px] text-on-surface-variant">${dsc[b]}</span>
+                  </div></label>`;
+              }).join('')}
+            </div>
+            <div id="recurring-fields" class="${d.billingType==='recurring'?'':'hidden'} mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 p-4 rounded-lg bg-amber-50 border border-amber-200">
+              <div><label class="text-label-bold text-on-surface-variant block mb-1 uppercase tracking-wider text-[11px]">Billing Cycle</label>
+                <select id="f-billing-cycle" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:outline-none focus:border-primary">${['Monthly','Quarterly','Annual'].map(c=>`<option ${d.billingCycle===c?'selected':''}>${c}</option>`).join('')}</select></div>
+              <div><label class="text-label-bold text-on-surface-variant block mb-1 uppercase tracking-wider text-[11px]">Next Billing Date</label>
+                <input id="f-next-billing" type="date" value="${d.nextBillingDate||''}" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-body-md focus:outline-none focus:border-primary"></div>
+              <div class="flex items-end"><label class="flex items-center gap-2 text-body-sm cursor-pointer"><input id="f-auto-renew" type="checkbox" ${d.autoRenew?'checked':''} class="rounded border-outline-variant text-primary focus:ring-primary"> Auto-renew each cycle</label></div>
+            </div>
+          </div>
+
           <!-- Payment Information -->
           <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
             <h3 class="text-headline-lg text-on-surface mb-4">Payment Information</h3>
@@ -6021,6 +6042,27 @@ function bindCreateSummaryHandlers(){
     validatePaidAmount();
   });
   document.getElementById('f-txn-ref').addEventListener('input',     e => { AppState.draft.transactionRef = e.target.value; });
+  document.querySelectorAll('.billing-radio').forEach(r => {
+    r.addEventListener('change', e => {
+      AppState.draft.billingType = e.target.value;
+      document.querySelectorAll('.billing-radio').forEach(rr => {
+        const div = rr.parentElement.querySelector('div');
+        const icon = div.querySelector('span.material-symbols-outlined');
+        const s = rr.checked;
+        div.className = `p-4 rounded-lg border ${s?'border-primary bg-primary-container/10 ring-1 ring-primary':'border-outline-variant bg-surface'} transition-all h-full`;
+        icon.className = `material-symbols-outlined ${s?'text-primary':'text-on-surface-variant'} block mb-1 text-xl`;
+      });
+      const rf = document.getElementById('recurring-fields');
+      if (rf) rf.classList.toggle('hidden', e.target.value !== 'recurring');
+      if (e.target.value === 'recurring' && !AppState.draft.nextBillingDate){
+        const dt = new Date(); dt.setDate(dt.getDate()+30); AppState.draft.nextBillingDate = dt.toISOString().slice(0,10);
+        const nb = document.getElementById('f-next-billing'); if (nb) nb.value = AppState.draft.nextBillingDate;
+      }
+    });
+  });
+  const bc = document.getElementById('f-billing-cycle'); if (bc) bc.addEventListener('change', e => AppState.draft.billingCycle = e.target.value);
+  const nbd = document.getElementById('f-next-billing'); if (nbd) nbd.addEventListener('change', e => AppState.draft.nextBillingDate = e.target.value);
+  const arn = document.getElementById('f-auto-renew'); if (arn) arn.addEventListener('change', e => AppState.draft.autoRenew = e.target.checked);
   applyPaymentTypeUI();
 }
 
@@ -6180,6 +6222,9 @@ function submitLicense(){
     status: 'Active',
     paymentStatus: payStatus,
     linkedInvoiceId: null,  // filled in next
+    billingType: d.billingType,
+    billingCycle: d.billingType==='recurring' ? d.billingCycle : null,
+    nextBillingDate: d.billingType==='recurring' ? d.nextBillingDate : null,
     selections: selectionsCopy
   };
 
@@ -6192,7 +6237,11 @@ function submitLicense(){
   const newInvoice = {
     id: newInvoiceId,
     company: newLicense.company,
-    type: d.paymentType === 'credit' ? 'Credit' : (d.paymentType === 'partial' ? 'Postpaid' : 'Prepaid'),
+    type: billingTypeLabel(d.billingType),
+    billingType: d.billingType,
+    billingCycle: d.billingType==='recurring' ? d.billingCycle : null,
+    nextBillingDate: d.billingType==='recurring' ? d.nextBillingDate : null,
+    autoRenew: d.billingType==='recurring' ? !!d.autoRenew : false,
     amountUSD: orderTotalUSD,
     balanceUSD: balance,
     status: invoiceStatus,
@@ -6328,6 +6377,7 @@ function submitInvoice(){
   else if (d.paymentType === 'paid')    { invoiceStatus='Paid';           paidAmt=orderTotalUSD;  balance=0;                         typeLabel='Prepaid'; }
   else if (d.paymentType === 'partial') { invoiceStatus='Partially Paid'; paidAmt=d.paidAmountUSD; balance=orderTotalUSD-d.paidAmountUSD; typeLabel='Postpaid'; }
   else /* credit */                     { invoiceStatus='Credit';         paidAmt=0;              balance=orderTotalUSD;             typeLabel='Credit'; }
+  typeLabel = billingTypeLabel(d.billingType);
 
   const orderConfig = buildOrderConfigSnapshot();
   const seq = String(AppState.invoices.length + 4).padStart(3, '0');
@@ -6338,6 +6388,10 @@ function submitInvoice(){
     id: newInvoiceId,
     company: COMPANY_NAMES[d.company] || d.company,
     type: typeLabel,
+    billingType: d.billingType,
+    billingCycle: d.billingType==='recurring' ? d.billingCycle : null,
+    nextBillingDate: d.billingType==='recurring' ? d.nextBillingDate : null,
+    autoRenew: d.billingType==='recurring' ? !!d.autoRenew : false,
     amountUSD: orderTotalUSD,
     balanceUSD: balance,
     status: invoiceStatus,
@@ -6386,7 +6440,7 @@ function renderInvoiceList(){
         <td class="px-4 py-3 text-right">
           <div class="flex items-center justify-end gap-1">
             ${inv.status !== 'Paid' ? `<button onclick="openConfirmPayment('${encodeURIComponent(inv.id)}')" class="text-green-700 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-colors" title="Mark as Paid"><span class="material-symbols-outlined text-[20px]">task_alt</span></button>` : ''}
-            ${inv.balanceUSD > 0 && inv.status !== 'Credit' && inv.status !== 'Unpaid' ? `<button onclick="openRecordPayment('${encodeURIComponent(inv.id)}')" class="text-tertiary hover:text-on-surface p-1 rounded hover:bg-surface-container transition-colors" title="Record Partial Payment"><span class="material-symbols-outlined text-[20px]">payments</span></button>` : ''}
+            ${inv.balanceUSD > 0 && inv.status !== 'Credit' ? `<button onclick="openRecordPayment('${encodeURIComponent(inv.id)}')" class="text-tertiary hover:text-on-surface p-1 rounded hover:bg-surface-container transition-colors" title="Record Partial Payment"><span class="material-symbols-outlined text-[20px]">payments</span></button>` : ''}
             <button onclick="navigate('/invoices/${encodeURIComponent(inv.id)}')" class="text-secondary hover:text-on-secondary-fixed-variant p-1 rounded hover:bg-secondary-fixed/50 transition-colors" title="View Details">
               <span class="material-symbols-outlined text-[20px]">visibility</span>
             </button>
@@ -6495,13 +6549,13 @@ function renderInvoiceDetail(id){
               <h2 class="text-headline-xl text-on-surface">Invoice #${inv.id}</h2>
               ${statusChipHTML}
             </div>
-            <p class="text-body-sm text-on-surface-variant">Issued ${inv.created} · Type: <span class="font-semibold">${inv.type}</span></p>
+            <p class="text-body-sm text-on-surface-variant">Issued ${inv.created} · Type: <span class="font-semibold">${inv.type}</span>${inv.billingType==='recurring' ? ` · <span class="inline-flex items-center gap-1 text-primary font-medium"><span class="material-symbols-outlined text-[16px]" style="vertical-align:-3px">autorenew</span>${inv.billingCycle||''} · next ${inv.nextBillingDate||'—'}${inv.autoRenew?' · auto-renew':''}</span>` : ''}</p>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             ${!isPaid ? `<button onclick="openConfirmPayment('${encodeURIComponent(inv.id)}')" class="px-4 py-2 bg-green-700 text-white rounded-lg text-sm font-medium hover:bg-green-800 transition-colors flex items-center gap-1.5">
               <span class="material-symbols-outlined text-[18px]">task_alt</span> Mark as Paid
             </button>` : ''}
-            ${hasBalance && inv.status !== 'Credit' && inv.status !== 'Unpaid' ? `<button onclick="openRecordPayment('${encodeURIComponent(inv.id)}')" class="px-4 py-2 border border-outline-variant text-on-surface rounded-lg text-sm font-medium hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
+            ${hasBalance && inv.status !== 'Credit' ? `<button onclick="openRecordPayment('${encodeURIComponent(inv.id)}')" class="px-4 py-2 border border-outline-variant text-on-surface rounded-lg text-sm font-medium hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
               <span class="material-symbols-outlined text-[18px]">payments</span> Record Partial
             </button>` : ''}
             <button class="px-4 py-2 border border-outline-variant text-on-surface rounded-lg text-sm font-medium hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
@@ -8251,10 +8305,30 @@ const DASH = (function(){
   ];
   const cById = Object.fromEntries(companies.map(c=>[c.id,c]));
 
-  const templates    = ['Individual','Standard','Subscription','Enterprise','Academy'];
-  const tmplSeat     = { Individual:55, Standard:75, Subscription:95, Enterprise:140, Academy:110 };
-  const tmplVol      = { Individual:[5,40], Standard:[20,90], Subscription:[40,160], Enterprise:[120,600], Academy:[60,300] };
-  const tmplW        = [{v:'Individual',w:3},{v:'Standard',w:4},{v:'Subscription',w:3},{v:'Enterprise',w:2},{v:'Academy',w:2}];
+  const TEMPLATE_DEFS = [
+    {name:'Individual',        seat:55,  vol:[5,40],   w:4},
+    {name:'Standard',          seat:75,  vol:[20,90],  w:4},
+    {name:'Subscription',      seat:95,  vol:[40,160], w:3},
+    {name:'Enterprise',        seat:140, vol:[120,600],w:2},
+    {name:'Academy',           seat:110, vol:[60,300], w:2},
+    {name:'Bootcamp',          seat:120, vol:[30,150], w:2},
+    {name:'Certification Prep',seat:85,  vol:[20,120], w:3},
+    {name:'Micro-Credential',  seat:45,  vol:[10,80],  w:2},
+    {name:'Team Plan',         seat:100, vol:[25,140], w:3},
+    {name:'Campus License',    seat:130, vol:[80,400], w:1},
+    {name:'Government',        seat:160, vol:[100,500],w:1},
+    {name:'Partner Reseller',  seat:70,  vol:[40,220], w:2},
+    {name:'Nonprofit',         seat:40,  vol:[15,90],  w:1},
+    {name:'Enterprise Plus',   seat:175, vol:[150,700],w:1},
+    {name:'Starter',           seat:35,  vol:[5,30],   w:3},
+    {name:'Professional',      seat:90,  vol:[20,120], w:3},
+    {name:'Global Enterprise', seat:190, vol:[200,900],w:1},
+    {name:'Custom',            seat:150, vol:[20,300], w:1}
+  ];
+  const templates = TEMPLATE_DEFS.map(t=>t.name);
+  const tmplSeat  = Object.fromEntries(TEMPLATE_DEFS.map(t=>[t.name,t.seat]));
+  const tmplVol   = Object.fromEntries(TEMPLATE_DEFS.map(t=>[t.name,t.vol]));
+  const tmplW     = TEMPLATE_DEFS.map(t=>({v:t.name,w:t.w}));
   const productTypes = ['Practice Tests','Online Courses','Sandbox','Hands-on Labs'];
   const ptMul        = { 'Practice Tests':0.8, 'Online Courses':1.0, 'Sandbox':1.15, 'Hands-on Labs':1.3 };
   const ptW          = [{v:'Practice Tests',w:3},{v:'Online Courses',w:4},{v:'Sandbox',w:2},{v:'Hands-on Labs',w:3}];
@@ -8272,15 +8346,17 @@ const DASH = (function(){
     for (let k=0; k<n; k++){
       const co = companies[ri(0, companies.length-1)];
       const isTrialNow = (co.type==='Trial') && !(co.converted && mi >= co.convMonth);
+      const purpose = isTrialNow ? 'trial' : pickW([{v:'client',w:82},{v:'free',w:9},{v:'testing',w:9}]);
+      const billable = (purpose === 'client');
       const tmpl = pickW(tmplW);
       const pt   = pickW(ptW);
       const volR = tmplVol[tmpl];
-      const allocated = isTrialNow ? ri(3,15) : ri(volR[0], volR[1]);
+      const allocated = billable ? ri(volR[0], volR[1]) : ri(3,15);
       const assigned  = Math.min(allocated, Math.round(allocated * rf(0.45, 0.96)));
       const seat = tmplSeat[tmpl] * ptMul[pt];
-      const gross = isTrialNow ? 0 : Math.round(allocated * seat * monthGrowth * rf(0.9,1.12));
+      const gross = billable ? Math.round(allocated * seat * monthGrowth * rf(0.9,1.12)) : 0;
       let invoiceType=null, invoiceStatus=null, paymentStatus='N/A', outstanding=0, collected=0;
-      if (!isTrialNow && gross>0){
+      if (billable && gross>0){
         invoiceType   = pickW([{v:'Prepaid',w:3},{v:'Postpaid',w:4},{v:'Recurring',w:3}]);
         invoiceStatus = pickW([{v:'Paid',w:60},{v:'Partial',w:15},{v:'Unpaid',w:12},{v:'Overdue',w:13}]);
         if (invoiceStatus==='Partial') outstanding = Math.round(gross * rf(0.2,0.6));
@@ -8295,7 +8371,7 @@ const DASH = (function(){
       const renewalISO = `${rd.getFullYear()}-${String(rd.getMonth()+1).padStart(2,'0')}-${String(rd.getDate()).padStart(2,'0')}`;
       records.push({
         id:'TXN-'+(rid++), dateISO, ym:mo.ym, companyId:co.id, company:co.name, industry:co.industry,
-        customerType: isTrialNow ? 'Trial' : 'Paid',
+        customerType: isTrialNow ? 'Trial' : 'Paid', purpose,
         template:tmpl, productType:pt,
         licenses:allocated, assigned, available: allocated-assigned,
         revenueUSD:gross, invoiceType, invoiceStatus, paymentStatus, outstandingUSD:outstanding, collectedUSD:collected,
@@ -8309,8 +8385,8 @@ const DASH = (function(){
 })();
 
 // ---- State ----
-function dashDefaultFilters(){ return { from:DASH.minDate, to:DASH.maxDate, template:'all', company:'all', productType:'all', invoiceType:'all', invoiceStatus:'all', paymentStatus:'all', customerType:'all' }; }
-const dashState = { applied: dashDefaultFilters(), compare: { enabled:false, from:'', to:'' } };
+function dashDefaultFilters(){ return { from:DASH.minDate, to:DASH.maxDate, template:'all', company:'all', productType:'all', invoiceType:'all', invoiceStatus:'all', paymentStatus:'all', customerType:'all', purpose:'all' }; }
+const dashState = { applied: dashDefaultFilters(), compare: { enabled:false, from:'', to:'' }, tmplSearch:'', tmplSort:'licenses' };
 let dashChartRefs = [];
 
 // ---- Helpers ----
@@ -8336,6 +8412,7 @@ function dashFilter(f){
     if (f.invoiceStatus!== 'all' && r.invoiceStatus !== f.invoiceStatus) return false;
     if (f.paymentStatus!== 'all' && r.paymentStatus !== f.paymentStatus) return false;
     if (f.customerType !== 'all' && r.customerType  !== f.customerType) return false;
+    if (f.purpose      !== 'all' && r.purpose        !== f.purpose) return false;
     return true;
   });
 }
@@ -8399,9 +8476,175 @@ function dashCompute(){
 // ---- Navigation (click-through) ----
 function dashGo(route, label){ showToast('Opening ' + label + '…', 'info'); navigate(route); }
 
+function dashCompanyEsc(e){ if(e.key==='Escape') dashCloseCompany(); }
+function dashCloseCompany(){ const hst=document.getElementById('dash-company-modal-host'); if(hst) hst.innerHTML=''; document.removeEventListener('keydown', dashCompanyEsc); }
+function dashOpenCompany(id){
+  let hst=document.getElementById('dash-company-modal-host');
+  if(!hst){ hst=document.createElement('div'); hst.id='dash-company-modal-host'; document.body.appendChild(hst); }
+  hst.innerHTML=dashCompanyModalHTML(id);
+  document.addEventListener('keydown', dashCompanyEsc);
+}
+function dashCompanyModalHTML(id){
+  const meta=DASH.cById[id]; if(!meta) return '';
+  const recs=dashFilter(Object.assign({}, dashState.applied, {company:id}));
+  const a=dashAgg(recs);
+  const dates=recs.map(r=>r.dateISO).sort();
+  const firstD=dates[0], lastD=dates[dates.length-1];
+  const invStatus={Paid:0,Partial:0,Unpaid:0,Overdue:0}; const invType={}; DASH.invoiceTypes.forEach(t=>invType[t]={count:0,rev:0});
+  recs.forEach(r=>{ if(r.invoiceStatus) invStatus[r.invoiceStatus]++; if(r.invoiceType){ invType[r.invoiceType].count++; invType[r.invoiceType].rev+=r.revenueUSD; } });
+  const upcoming=recs.filter(r=>r.licenseStatus==='Active').map(r=>({d:dashDaysUntil(r.renewalISO),iso:r.renewalISO})).filter(x=>x.d>=0&&x.d<=60).sort((p,q)=>p.d-q.d);
+  const collPct=a.invoiced?Math.round(a.collected/a.invoiced*100):0;
+  const typeChip = meta.type==='Trial'
+    ? `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-[12px] font-medium">Trial${meta.converted?' → Paid':''}</span>`
+    : '<span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-[12px] font-medium">Paid</span>';
+  const stat=(label,val,accent,sub)=>`<div class="bg-surface-container-low rounded-lg p-3 border border-outline-variant/60"><div class="text-[11px] uppercase tracking-wide text-on-surface-variant">${label}</div><div class="text-[20px] font-bold leading-none mt-1 ${accent||'text-on-surface'}">${val}</div>${sub?`<div class="text-[11px] text-on-surface-variant mt-1">${sub}</div>`:''}</div>`;
+  const info=(l,v)=>`<div class="flex justify-between gap-4 py-1.5 border-b border-outline-variant/40 last:border-0"><span class="text-body-sm text-on-surface-variant">${l}</span><span class="text-body-sm font-medium text-on-surface text-right">${v}</span></div>`;
+  const lchip=(s)=>{ const m={Active:'bg-green-100 text-green-700',Expired:'bg-red-100 text-red-700',Invalidated:'bg-surface-container-high text-on-surface-variant'}; return `<span class="px-2 py-0.5 rounded-full text-[11px] font-medium ${m[s]||''}">${s}</span>`; };
+  const ichip=(s)=>{ if(!s) return '<span class="text-on-surface-variant">—</span>'; const m={Paid:'bg-green-100 text-green-700',Partial:'bg-amber-100 text-amber-700',Unpaid:'bg-surface-container-high text-on-surface-variant',Overdue:'bg-red-100 text-red-700'}; return `<span class="px-2 py-0.5 rounded-full text-[11px] font-medium ${m[s]||''}">${s}</span>`; };
+  const sc=(label,count,cls)=>`<span class="px-2 py-0.5 rounded-full ${cls} text-[11px] font-medium">${label}: ${count}</span>`;
+  const recRows = recs.slice().sort((x,y)=>y.dateISO.localeCompare(x.dateISO)).map(r=>`
+    <tr class="border-t border-outline-variant/50 hover:bg-surface-container-low">
+      <td class="px-2 py-1.5 whitespace-nowrap text-on-surface-variant">${r.id}</td>
+      <td class="px-2 py-1.5 whitespace-nowrap">${dashFmtDay(r.dateISO)}</td>
+      <td class="px-2 py-1.5 whitespace-nowrap">${r.template}</td>
+      <td class="px-2 py-1.5 whitespace-nowrap">${r.productType}</td>
+      <td class="px-2 py-1.5 text-right">${r.licenses}</td>
+      <td class="px-2 py-1.5 text-right">${r.assigned}</td>
+      <td class="px-2 py-1.5">${lchip(r.licenseStatus)}</td>
+      <td class="px-2 py-1.5 whitespace-nowrap">${r.invoiceType||'—'}</td>
+      <td class="px-2 py-1.5">${ichip(r.invoiceStatus)}</td>
+      <td class="px-2 py-1.5 text-right whitespace-nowrap">${r.revenueUSD?dashFmtMoney(r.revenueUSD):'—'}</td>
+      <td class="px-2 py-1.5 text-right whitespace-nowrap ${r.outstandingUSD>0?'text-error':'text-on-surface-variant'}">${r.outstandingUSD>0?dashFmtMoney(r.outstandingUSD):'—'}</td>
+      <td class="px-2 py-1.5 whitespace-nowrap">${dashFmtDay(r.renewalISO)}</td>
+    </tr>`).join('') || '<tr><td colspan="12" class="px-2 py-6 text-center text-body-sm text-on-surface-variant">No records in the current filter range.</td></tr>';
+  const encName=encodeURIComponent(meta.name);
+
+  return `
+  <div class="fixed inset-0 z-[120] flex items-center justify-center bg-on-surface/40 backdrop-blur-sm p-4" onclick="if(event.target===this)dashCloseCompany()">
+    <div class="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant w-full max-w-[980px] max-h-[92vh] flex flex-col overflow-hidden">
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-outline-variant flex items-start justify-between gap-4 bg-surface-container-low">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center text-headline-lg font-bold">${escapeHtml(meta.name[0])}</div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap"><h2 class="text-headline-lg text-on-surface">${escapeHtml(meta.name)}</h2>${typeChip}</div>
+            <div class="text-body-sm text-on-surface-variant mt-0.5">${escapeHtml(meta.industry)} · Account ID <span class="font-mono">${escapeHtml(meta.id)}</span></div>
+          </div>
+        </div>
+        <button onclick="dashCloseCompany()" class="text-on-surface-variant hover:text-on-surface w-9 h-9 rounded-full hover:bg-surface-container-high flex items-center justify-center"><span class="material-symbols-outlined">close</span></button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 space-y-6 overflow-y-auto">
+        <p class="text-[12px] text-on-surface-variant flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">filter_alt</span>Figures reflect the current dashboard filters (${dashState.applied.from} → ${dashState.applied.to}).</p>
+
+        <!-- Basic Information -->
+        <div>
+          <h3 class="text-label-bold uppercase text-on-surface-variant mb-2 flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px] text-primary">badge</span>Basic Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2">
+            ${info('Account / Client name', escapeHtml(meta.name))}
+            ${info('Industry', escapeHtml(meta.industry))}
+            ${info('Customer type', meta.type + (meta.converted?' (converted from trial)':''))}
+            ${info('Total orders', dashNum(recs.length))}
+            ${info('Active period', firstD?`${dashFmtDay(firstD)} → ${dashFmtDay(lastD)}`:'—')}
+            ${info('Next renewal (≤60d)', upcoming.length?dashFmtDay(upcoming[0].iso):'None due')}
+          </div>
+        </div>
+
+        <!-- License Management -->
+        <div>
+          <h3 class="text-label-bold uppercase text-on-surface-variant mb-2 flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px] text-primary">workspace_premium</span>License Management</h3>
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            ${stat('Purchased', dashNum(a.purchased))}
+            ${stat('Assigned', dashNum(a.assigned),'text-secondary')}
+            ${stat('Available', dashNum(a.available))}
+            ${stat('Active', dashNum(a.activeLic),'text-green-700')}
+            ${stat('Expired', dashNum(a.expiredLic), a.expiredLic>0?'text-error':'text-on-surface')}
+            ${stat('Utilization', a.utilization.toFixed(1)+'%','text-secondary')}
+          </div>
+          <div class="mt-2 h-2 rounded-full bg-surface-container-high overflow-hidden"><div class="h-full rounded-full ${a.utilization>=75?'bg-green-600':a.utilization>=50?'bg-secondary':'bg-amber-500'}" style="width:${Math.max(2,Math.min(100,a.utilization))}%"></div></div>
+        </div>
+
+        <!-- Financial -->
+        <div>
+          <h3 class="text-label-bold uppercase text-on-surface-variant mb-2 flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px] text-primary">payments</span>Financial Summary</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            ${stat('Revenue Invoiced', dashFmtCompact(a.invoiced),'text-on-surface', dashFmtMoney(a.invoiced))}
+            ${stat('Collected', dashFmtCompact(a.collected),'text-green-700', collPct+'% of invoiced')}
+            ${stat('Outstanding', dashFmtCompact(a.outstanding), a.outstanding>0?'text-error':'text-green-700')}
+            ${stat('Collection Rate', collPct+'%','text-secondary')}
+          </div>
+        </div>
+
+        <!-- Invoices -->
+        <div>
+          <h3 class="text-label-bold uppercase text-on-surface-variant mb-2 flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px] text-primary">receipt_long</span>Invoices</h3>
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            ${sc('Generated', a.invoicesGenerated,'bg-surface-container-high text-on-surface')}
+            ${sc('Collected', a.invoicesCollected,'bg-green-100 text-green-700')}
+            <span class="w-px h-4 bg-outline-variant mx-1"></span>
+            ${sc('Paid', invStatus.Paid,'bg-green-100 text-green-700')}
+            ${sc('Partial', invStatus.Partial,'bg-amber-100 text-amber-700')}
+            ${sc('Unpaid', invStatus.Unpaid,'bg-surface-container-high text-on-surface-variant')}
+            ${sc('Overdue', invStatus.Overdue,'bg-red-100 text-red-700')}
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            ${DASH.invoiceTypes.map(t=>`<div class="bg-surface-container-low rounded-lg p-3 border border-outline-variant/60"><div class="text-[11px] uppercase tracking-wide text-on-surface-variant">${t}</div><div class="text-body-md font-semibold text-on-surface mt-1">${dashFmtMoney(invType[t].rev)}</div><div class="text-[11px] text-on-surface-variant">${invType[t].count} invoice(s)</div></div>`).join('')}
+          </div>
+        </div>
+
+        <!-- Records -->
+        <div>
+          <h3 class="text-label-bold uppercase text-on-surface-variant mb-2 flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px] text-primary">list_alt</span>License &amp; Invoice Records</h3>
+          <div class="border border-outline-variant rounded-lg overflow-hidden">
+            <div class="overflow-x-auto max-h-[340px]">
+              <table class="w-full text-body-sm min-w-[900px]">
+                <thead class="bg-surface-container-low text-on-surface-variant sticky top-0">
+                  <tr class="text-label-bold uppercase">
+                    <th class="px-2 py-2 text-left">Txn ID</th><th class="px-2 py-2 text-left">Date</th><th class="px-2 py-2 text-left">Template</th><th class="px-2 py-2 text-left">Product</th>
+                    <th class="px-2 py-2 text-right">Lic</th><th class="px-2 py-2 text-right">Asgd</th><th class="px-2 py-2 text-left">Lic Status</th>
+                    <th class="px-2 py-2 text-left">Inv Type</th><th class="px-2 py-2 text-left">Inv Status</th>
+                    <th class="px-2 py-2 text-right">Revenue</th><th class="px-2 py-2 text-right">Outstanding</th><th class="px-2 py-2 text-left">Renewal</th>
+                  </tr>
+                </thead>
+                <tbody>${recRows}</tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+        <button onclick="dashCloseCompany()" class="px-4 py-2.5 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container text-nav-item transition-colors">Close</button>
+        <button onclick="dashCloseCompany(); dashGo('/license-details?client=${encName}','license details')" class="px-5 py-2.5 rounded-lg bg-primary text-on-primary text-nav-item hover:bg-surface-tint transition-colors flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">open_in_new</span>Open in License Details</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+
 // ============================================================================
 // RENDER
 // ============================================================================
+function dashTemplateRows(){
+  const D=dashCompute();
+  const q=(dashState.tmplSearch||'').toLowerCase();
+  const sort=dashState.tmplSort||'licenses';
+  const totalLic=Object.values(D.byTemplateLic).reduce((s,v)=>s+v,0)||1;
+  let rows=Object.keys(D.byTemplateLic).map(t=>({name:t, licenses:D.byTemplateLic[t]||0, orders:D.byTemplateOrders[t]||0, revenue:D.byTemplateRev[t]||0}));
+  if(q) rows=rows.filter(r=>r.name.toLowerCase().includes(q));
+  rows.sort((a,b)=> sort==='name' ? a.name.localeCompare(b.name) : (sort==='orders'? b.orders-a.orders : (sort==='revenue'? b.revenue-a.revenue : b.licenses-a.licenses)));
+  if(!rows.length) return '<tr><td colspan="5" class="px-3 py-6 text-center text-on-surface-variant text-body-sm">No templates match your search.</td></tr>';
+  return rows.map(r=>`<tr class="border-t border-outline-variant/50 hover:bg-surface-container-low cursor-pointer" onclick="dashGo('/license-details','license details')">
+    <td class="px-3 py-2 font-medium text-on-surface whitespace-nowrap">${escapeHtml(r.name)}</td>
+    <td class="px-3 py-2 text-right">${dashNum(r.licenses)}</td>
+    <td class="px-3 py-2 text-right">${dashNum(r.orders)}</td>
+    <td class="px-3 py-2 text-right whitespace-nowrap">${dashFmtMoney(r.revenue)}</td>
+    <td class="px-3 py-2 text-right text-on-surface-variant">${(r.licenses/totalLic*100).toFixed(1)}%</td>
+  </tr>`).join('');
+}
+
 function renderExecDashboard(){
   const D = dashCompute(); const k = D.cur; const cmp = D.cmp; const f = dashState.applied; const cp = dashState.compare;
   const sel=(v,o)=> v===o?'selected':'';
@@ -8436,7 +8679,7 @@ function renderExecDashboard(){
 
   // Company-wise summary rows
   const csRows = D.companyStats.map((c,i)=>`
-    <tr class="border-t border-outline-variant/60 hover:bg-surface-container-low cursor-pointer" onclick="dashGo('/license-reports?client=${encodeURIComponent(c.name)}','account records')">
+    <tr class="border-t border-outline-variant/60 hover:bg-surface-container-low cursor-pointer" onclick="dashOpenCompany('${c.id}')">
       <td class="px-3 py-2 text-right text-on-surface-variant">${i+1}</td>
       <td class="px-3 py-2"><div class="font-medium text-on-surface whitespace-nowrap">${escapeHtml(c.name)}</div><div class="text-[11px] text-on-surface-variant">${escapeHtml(c.industry)}</div></td>
       <td class="px-3 py-2 text-right font-semibold whitespace-nowrap">${dashFmtMoney(c.revenue)}</td>
@@ -8464,7 +8707,7 @@ function renderExecDashboard(){
   // Client-wise utilization (same accounts, utilization focus) — sorted by utilization
   const utilSorted = D.companyStats.slice().sort((a,b)=>b.util-a.util);
   const utilRows = utilSorted.map(c=>`
-    <div class="flex items-center gap-3 py-1.5 cursor-pointer hover:bg-surface-container-low rounded px-1" onclick="dashGo('/license-details?client=${encodeURIComponent(c.name)}','license utilization')">
+    <div class="flex items-center gap-3 py-1.5 cursor-pointer hover:bg-surface-container-low rounded px-1" onclick="dashOpenCompany('${c.id}')">
       <div class="w-40 min-w-[10rem] truncate text-[13px] text-on-surface font-medium">${escapeHtml(c.name)}</div>
       <div class="flex-1"><div class="h-2 rounded-full bg-surface-container-high overflow-hidden"><div class="h-full rounded-full ${c.util>=75?'bg-green-600':c.util>=50?'bg-secondary':'bg-amber-500'}" style="width:${Math.max(2,Math.min(100,c.util))}%"></div></div></div>
       <div class="w-14 text-right text-[12px] font-semibold">${c.util.toFixed(0)}%</div>
@@ -8518,11 +8761,9 @@ function renderExecDashboard(){
         <div><label class="text-[11px] text-on-surface-variant block mb-1">To</label><input type="date" id="dash-to" value="${f.to}" class="w-full bg-surface border border-outline-variant rounded-lg px-2.5 py-2 text-body-sm focus:outline-none focus:border-primary"></div>
         <div><label class="text-[11px] text-on-surface-variant block mb-1">Company / Client</label><select id="dash-company" class="w-full bg-surface border border-outline-variant rounded-lg px-2.5 py-2 text-body-sm focus:outline-none focus:border-primary"><option value="all" ${sel(f.company,'all')}>All Accounts</option>${companyOpts}</select></div>
         <div><label class="text-[11px] text-on-surface-variant block mb-1">License Template</label><select id="dash-template" class="w-full bg-surface border border-outline-variant rounded-lg px-2.5 py-2 text-body-sm focus:outline-none focus:border-primary"><option value="all" ${sel(f.template,'all')}>All Templates</option>${optList(DASH.templates,f.template)}</select></div>
-        <div><label class="text-[11px] text-on-surface-variant block mb-1">Product Type</label><select id="dash-product" class="w-full bg-surface border border-outline-variant rounded-lg px-2.5 py-2 text-body-sm focus:outline-none focus:border-primary"><option value="all" ${sel(f.productType,'all')}>All Products</option>${optList(DASH.productTypes,f.productType)}</select></div>
         <div><label class="text-[11px] text-on-surface-variant block mb-1">Invoice Type</label><select id="dash-invtype" class="w-full bg-surface border border-outline-variant rounded-lg px-2.5 py-2 text-body-sm focus:outline-none focus:border-primary"><option value="all" ${sel(f.invoiceType,'all')}>All Types</option>${optList(DASH.invoiceTypes,f.invoiceType)}</select></div>
         <div><label class="text-[11px] text-on-surface-variant block mb-1">Invoice Status</label><select id="dash-invstatus" class="w-full bg-surface border border-outline-variant rounded-lg px-2.5 py-2 text-body-sm focus:outline-none focus:border-primary"><option value="all" ${sel(f.invoiceStatus,'all')}>All Statuses</option>${optList(DASH.invoiceStatuses,f.invoiceStatus)}</select></div>
-        <div><label class="text-[11px] text-on-surface-variant block mb-1">Payment Status</label><select id="dash-paystatus" class="w-full bg-surface border border-outline-variant rounded-lg px-2.5 py-2 text-body-sm focus:outline-none focus:border-primary"><option value="all" ${sel(f.paymentStatus,'all')}>All</option><option value="Paid" ${sel(f.paymentStatus,'Paid')}>Paid</option><option value="Partial" ${sel(f.paymentStatus,'Partial')}>Partial</option><option value="Unpaid" ${sel(f.paymentStatus,'Unpaid')}>Unpaid</option></select></div>
-        <div><label class="text-[11px] text-on-surface-variant block mb-1">Customer</label><select id="dash-custtype" class="w-full bg-surface border border-outline-variant rounded-lg px-2.5 py-2 text-body-sm focus:outline-none focus:border-primary"><option value="all" ${sel(f.customerType,'all')}>Trial & Paid</option><option value="Paid" ${sel(f.customerType,'Paid')}>Paid only</option><option value="Trial" ${sel(f.customerType,'Trial')}>Trial only</option></select></div>
+        <div><label class="text-[11px] text-on-surface-variant block mb-1">Purpose</label><select id="dash-purpose" class="w-full bg-surface border border-outline-variant rounded-lg px-2.5 py-2 text-body-sm focus:outline-none focus:border-primary"><option value="all" ${sel(f.purpose,'all')}>All Purposes</option><option value="client" ${sel(f.purpose,'client')}>Client (billable)</option><option value="trial" ${sel(f.purpose,'trial')}>Trial</option><option value="free" ${sel(f.purpose,'free')}>Free</option><option value="testing" ${sel(f.purpose,'testing')}>Testing</option></select></div>
       </div>
       <div class="flex flex-wrap items-center justify-between gap-3 mt-3 pt-3 border-t border-outline-variant/50">
         <label class="flex items-center gap-2 text-[12px] text-on-surface cursor-pointer select-none">
@@ -8549,10 +8790,30 @@ function renderExecDashboard(){
       ${chartCard('License Purchase Trends','Licenses purchased per month','dashChLicense',240)}
       ${chartCard('Invoice Status Summary','Invoices by status','dashChInvStatus',240)}
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      ${chartCard('Template-wise Revenue','Revenue by license template','dashChTmplRev',240)}
-      ${chartCard('Template-wise License Creation','Licenses created by template','dashChTmplLic',240)}
-      ${chartCard('Invoice Type-wise Statistics','Revenue by invoice type','dashChInvType',240)}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      ${chartCard('Template-wise Revenue','Top templates by revenue — remaining grouped as “Others”','dashChTmplRev',360)}
+      ${chartCard('Invoice Type-wise Statistics','Revenue by invoice type','dashChInvType',360)}
+    </div>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div><h3 class="text-body-md font-semibold text-on-surface">Template-wise License Creation</h3><p class="text-[12px] text-on-surface-variant">All templates — searchable &amp; sortable, scales to any number. Click a row to open licenses for that template.</p></div>
+        <div class="flex items-center gap-2">
+          <div class="relative"><span class="material-symbols-outlined text-[18px] text-on-surface-variant absolute left-2 top-1/2 -translate-y-1/2">search</span><input id="dash-tmpl-search" value="${escapeAttr(dashState.tmplSearch||'')}" placeholder="Search template…" class="bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-1.5 text-body-sm focus:outline-none focus:border-primary w-44"></div>
+          <select id="dash-tmpl-sort" class="bg-surface border border-outline-variant rounded-lg px-2.5 py-1.5 text-body-sm focus:outline-none focus:border-primary">
+            <option value="licenses">Sort: Licenses</option><option value="orders">Sort: Orders</option><option value="revenue">Sort: Revenue</option><option value="name">Sort: Name</option>
+          </select>
+        </div>
+      </div>
+      <div class="border border-outline-variant rounded-lg overflow-hidden">
+        <div class="overflow-x-auto max-h-[340px]">
+          <table class="w-full text-body-sm min-w-[620px]">
+            <thead class="bg-surface-container-low text-on-surface-variant sticky top-0"><tr class="text-label-bold uppercase">
+              <th class="px-3 py-2 text-left">Template</th><th class="px-3 py-2 text-right">Licenses Created</th><th class="px-3 py-2 text-right">Orders</th><th class="px-3 py-2 text-right">Revenue</th><th class="px-3 py-2 text-right">% Licenses</th>
+            </tr></thead>
+            <tbody id="dash-tmpl-tbody">${dashTemplateRows()}</tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- Company / Client -->
@@ -8634,13 +8895,13 @@ function dashRenderCharts(){
   mk('dashChInvStatus',{ type:'doughnut', data:{ labels:isL, datasets:[{ data:isL.map(s=>D.invStatus[s]), backgroundColor:[GREEN,AMBER,GRAY,PRIMARY], borderWidth:0 }] },
     options:{ responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{ legend:{position:'right'} } } });
 
-  const tl=Object.keys(D.byTemplateRev);
-  mk('dashChTmplRev',{ type:'bar', data:{ labels:tl, datasets:[{ label:'Revenue', data:tl.map(t=>D.byTemplateRev[t]), backgroundColor:PALETTE, borderRadius:4 }] },
-    options:{ responsive:true, maintainAspectRatio:false, onClick:navClick(tl,'/license-reports','template'), plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>' '+cur(c.parsed.y)}} }, scales:{ x:noGridX, y:moneyAxis } } });
+  const tRevAll=Object.entries(D.byTemplateRev).sort((a,b)=>b[1]-a[1]);
+  const tTop=tRevAll.slice(0,12), tRest=tRevAll.slice(12);
+  const tLab=tTop.map(x=>x[0]), tDat=tTop.map(x=>x[1]);
+  if(tRest.length){ tLab.push('Others ('+tRest.length+')'); tDat.push(tRest.reduce((s,x)=>s+x[1],0)); }
+  mk('dashChTmplRev',{ type:'bar', data:{ labels:tLab, datasets:[{ label:'Revenue', data:tDat, backgroundColor:PRIMARY, borderRadius:4 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, onClick:navClick(tLab,'/license-reports','template'), plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>' '+cur(c.parsed.x)}} }, scales:{ x:{ ticks:{callback:(v)=>cur(v)}, grid:{color:gridC} }, y:noGridX } } });
 
-  const tll=Object.keys(D.byTemplateLic);
-  mk('dashChTmplLic',{ type:'bar', data:{ labels:tll, datasets:[{ label:'Licenses', data:tll.map(t=>D.byTemplateLic[t]), backgroundColor:PURPLE, borderRadius:4 }] },
-    options:{ responsive:true, maintainAspectRatio:false, onClick:navClick(tll,'/license-details','template'), plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>' '+c.parsed.y+' licenses ('+(D.byTemplateOrders[tll[c.dataIndex]]||0)+' orders)'}} }, scales:{ x:noGridX, y:numAxis } } });
 
   const it=DASH.invoiceTypes;
   mk('dashChInvType',{ type:'bar', data:{ labels:it, datasets:[{ label:'Revenue', data:it.map(t=>D.invType[t].rev), backgroundColor:[PRIMARY,SECONDARY,GREEN], borderRadius:4 }] },
@@ -8648,7 +8909,7 @@ function dashRenderCharts(){
 
   const top10=D.companyStats.slice(0,10);
   mk('dashChCompany',{ type:'bar', data:{ labels:top10.map(c=>c.name), datasets:[{ label:'Revenue', data:top10.map(c=>c.revenue), backgroundColor:PRIMARY, borderRadius:4 }] },
-    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, onClick:(e,els)=>{ if(els&&els.length){ const c=top10[els[0].index]; dashGo('/license-reports?client='+encodeURIComponent(c.name),'account records'); } }, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>' '+cur(c.parsed.x)}} }, scales:{ x:{ ticks:{callback:(v)=>cur(v)}, grid:{color:gridC} }, y:noGridX } } });
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, onClick:(e,els)=>{ if(els&&els.length){ const c=top10[els[0].index]; dashOpenCompany(c.id); } }, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>' '+cur(c.parsed.x)}} }, scales:{ x:{ ticks:{callback:(v)=>cur(v)}, grid:{color:gridC} }, y:noGridX } } });
 }
 
 // ============================================================================
@@ -8661,6 +8922,10 @@ function bindExecDashboardHandlers(){
     if (cb.checked && (!dashState.compare.from || !dashState.compare.to)){ const d=dashDefaultCompare(); dashState.compare.from=d.from; dashState.compare.to=d.to; }
     renderApp();
   });
+  const ts=document.getElementById('dash-tmpl-search');
+  if (ts) ts.addEventListener('input', e=>{ dashState.tmplSearch=e.target.value; const tb=document.getElementById('dash-tmpl-tbody'); if(tb) tb.innerHTML=dashTemplateRows(); });
+  const tso=document.getElementById('dash-tmpl-sort');
+  if (tso){ tso.value=dashState.tmplSort||'licenses'; tso.addEventListener('change', e=>{ dashState.tmplSort=e.target.value; const tb=document.getElementById('dash-tmpl-tbody'); if(tb) tb.innerHTML=dashTemplateRows(); }); }
   requestAnimationFrame(dashRenderCharts);
 }
 function dashApplyFilters(){
@@ -8669,9 +8934,10 @@ function dashApplyFilters(){
   if (from && to && from>to){ showToast('“From” date must be on or before “To” date.','error','Invalid date range'); return; }
   const a=dashState.applied;
   a.from=from||DASH.minDate; a.to=to||DASH.maxDate;
-  a.company=g('dash-company').value; a.template=g('dash-template').value; a.productType=g('dash-product').value;
-  a.invoiceType=g('dash-invtype').value; a.invoiceStatus=g('dash-invstatus').value; a.paymentStatus=g('dash-paystatus').value;
-  a.customerType=g('dash-custtype').value;
+  a.company=g('dash-company').value; a.template=g('dash-template').value; a.productType='all';
+  a.invoiceType=g('dash-invtype').value; a.invoiceStatus=g('dash-invstatus').value;
+  a.purpose=g('dash-purpose').value;
+  a.paymentStatus='all'; a.customerType='all';
   const cb=g('dash-compare'); dashState.compare.enabled = !!(cb && cb.checked);
   if (dashState.compare.enabled){
     const cf=g('dash-cfrom'), ct=g('dash-cto');
@@ -8698,8 +8964,8 @@ function dashExportData(){
     ['Date range',`${f.from} to ${f.to}`],
     ['Compare', cp.enabled?`${cp.from} to ${cp.to}`:'off'],
     ['Company / Client', f.company==='all'?'all':(DASH.cById[f.company]?.name||f.company)],
-    ['Template', f.template], ['Product type', f.productType],
-    ['Invoice type', f.invoiceType], ['Invoice status', f.invoiceStatus], ['Payment status', f.paymentStatus], ['Customer', f.customerType]
+    ['Template', f.template],
+    ['Invoice type', f.invoiceType], ['Invoice status', f.invoiceStatus], ['Purpose', f.purpose]
   ];
   const kpiRows=[
     ['Total Licenses Purchased', k.purchased], ['Total Licenses Assigned', k.assigned], ['Total Available Licenses', k.available], ['Total Expired Licenses', k.expiredLic],
@@ -8712,8 +8978,8 @@ function dashExportData(){
   const compRows=D.companyStats.map(c=>[c.name, money(c.revenue), money(c.collected), money(c.outstanding), c.purchased, c.assigned, c.available, c.expired, +c.util.toFixed(1), c.invGen, c.invColl]);
   const tmplRows=Object.keys(D.byTemplateRev).map(t=>[t, money(D.byTemplateRev[t]), D.byTemplateLic[t]||0, D.byTemplateOrders[t]||0]);
   const invTypeRows=DASH.invoiceTypes.map(t=>[t, D.invType[t].count, money(D.invType[t].rev)]);
-  const txnHeader=['Transaction ID','Date','Company / Client','Customer','Template','Product Type','Licenses','Assigned','Available','Revenue ('+cur+')','Collected ('+cur+')','Outstanding ('+cur+')','Invoice Type','Invoice Status','Payment Status','License Status','Renewal Date'];
-  const txnRows=D.recs.map(r=>[r.id,r.dateISO,r.company,r.customerType,r.template,r.productType,r.licenses,r.assigned,r.available,money(r.revenueUSD),money(r.collectedUSD),money(r.outstandingUSD),r.invoiceType||'',r.invoiceStatus||'',r.paymentStatus,r.licenseStatus,r.renewalISO]);
+  const txnHeader=['Transaction ID','Date','Company / Client','Customer','Purpose','Template','Product Type','Licenses','Assigned','Available','Revenue ('+cur+')','Collected ('+cur+')','Outstanding ('+cur+')','Invoice Type','Invoice Status','Payment Status','License Status','Renewal Date'];
+  const txnRows=D.recs.map(r=>[r.id,r.dateISO,r.company,r.customerType,r.purpose,r.template,r.productType,r.licenses,r.assigned,r.available,money(r.revenueUSD),money(r.collectedUSD),money(r.outstandingUSD),r.invoiceType||'',r.invoiceStatus||'',r.paymentStatus,r.licenseStatus,r.renewalISO]);
   return { cur, filtersApplied, kpiRows, compHeader, compRows, tmplRows, invTypeRows, txnHeader, txnRows };
 }
 function dashDownload(blob, filename){ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },100); }
